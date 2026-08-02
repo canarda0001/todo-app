@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Görevlerim</h1>
+      <p class="subtitle">Günlük işlerini takip et</p>
+    </header>
+
+    <form id="todo-form" class="todo-form" autocomplete="off">
+      <input
+        id="todo-input"
+        type="text"
+        placeholder="Yeni görev ekle..."
+        maxlength="200"
+        required
+      >
+      <button type="submit" aria-label="Görev ekle">Ekle</button>
+    </form>
+
+    <nav class="filters" aria-label="Görev filtreleri">
+      <button type="button" class="filter-btn active" data-filter="all">Tümü</button>
+      <button type="button" class="filter-btn" data-filter="active">Aktif</button>
+      <button type="button" class="filter-btn" data-filter="completed">Tamamlanan</button>
+    </nav>
+
+    <ul id="todo-list" class="todo-list" aria-live="polite"></ul>
+
+    <footer class="footer">
+      <span id="items-left">0 görev kaldı</span>
+      <button type="button" id="clear-completed" class="link-btn">Tamamlananları temizle</button>
+    </footer>
+  </main>
+
+  <template id="todo-item-template">
+    <li class="todo-item">
+      <label class="todo-check">
+        <input type="checkbox" class="todo-checkbox">
+        <span class="checkmark"></span>
+      </label>
+      <span class="todo-text"></span>
+      <div class="todo-actions">
+        <button type="button" class="edit-btn" aria-label="Düzenle">Düzenle</button>
+        <button type="button" class="delete-btn" aria-label="Sil">Sil</button>
+      </div>
+    </li>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
