@@ -1,16 +1,16 @@
 :root {
-  --bg: #0f1419;
-  --surface: #1a2332;
-  --surface-hover: #243044;
-  --border: #2d3a4f;
-  --text: #e8edf5;
-  --text-muted: #8b9cb3;
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --surface-hover: #eef2f6;
+  --border: #d1d5db;
+  --text: #1a1a1a;
+  --text-muted: #6b7280;
   --accent: #4f8cff;
   --accent-hover: #3a78eb;
   --success: #34c759;
   --danger: #ff5c5c;
   --radius: 12px;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 *,
@@ -23,12 +23,12 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-  background:
-    radial-gradient(circle at top, #1e2a3a 0%, var(--bg) 55%);
+  background: var(--bg);
   color: var(--text);
   display: flex;
   justify-content: center;
   padding: 2rem 1rem;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .app {
@@ -38,6 +38,7 @@ body {
   border-radius: calc(var(--radius) + 4px);
   box-shadow: var(--shadow);
   padding: 1.75rem;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .header {
@@ -62,16 +63,21 @@ body {
   margin-bottom: 1.25rem;
 }
 
+/* Aydınlık modda girdi kutusu: İçi beyaz, yazısı siyah */
 .todo-form input {
   flex: 1;
   padding: 0.85rem 1rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--text);
+  background-color: #ffffff !important;
+  color: #000000 !important;
   font-size: 1rem;
   outline: none;
   transition: border-color 0.15s;
+}
+
+.todo-form input::placeholder {
+  color: #6b7280 !important;
 }
 
 .todo-form input:focus {
@@ -138,23 +144,15 @@ body {
   align-items: center;
   gap: 0.75rem;
   padding: 0.85rem 1rem;
-  background: var(--bg);
+  background: var(--surface-hover);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   transition: border-color 0.15s, opacity 0.15s;
 }
 
-.todo-item:hover {
-  border-color: #3d4f6a;
-}
-
 .todo-item.completed .todo-text {
   text-decoration: line-through;
   color: var(--text-muted);
-}
-
-.todo-item.editing {
-  border-color: var(--accent);
 }
 
 .todo-check {
@@ -190,7 +188,7 @@ body {
 
 .todo-checkbox:checked + .checkmark::after {
   content: "✓";
-  color: white;
+  color: #ffffff;
   font-size: 0.75rem;
   font-weight: bold;
 }
@@ -199,44 +197,6 @@ body {
   flex: 1;
   word-break: break-word;
   line-height: 1.4;
-}
-
-.todo-edit-input {
-  flex: 1;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 1rem;
-  outline: none;
-}
-
-.todo-actions {
-  display: flex;
-  gap: 0.35rem;
-  flex-shrink: 0;
-}
-
-.todo-actions button {
-  padding: 0.35rem 0.65rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.edit-btn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.delete-btn:hover {
-  color: var(--danger);
-  border-color: var(--danger);
 }
 
 .footer {
@@ -264,13 +224,6 @@ body {
   color: var(--danger);
 }
 
-.empty-state {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-}
-
 @media (max-width: 480px) {
   .app {
     padding: 1.25rem;
@@ -285,4 +238,65 @@ body {
     gap: 0.75rem;
     text-align: center;
   }
+}
+
+/* =======================================
+   KARANLIK MOD (DARK MODE) AYARLARI
+   ======================================= */
+.dark-mode-wrapper {
+  background-color: #0f1419 !important;
+  color: #e8edf5 !important;
+}
+
+.dark-mode-wrapper .app {
+  background-color: #1a2332 !important;
+  color: #e8edf5 !important;
+  border-color: #2d3a4f !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Karanlık modda girdi kutusu: Koyu zemin, açık renk yazı */
+.dark-mode-wrapper .todo-form input {
+  background-color: #0f1419 !important;
+  color: #ffffff !important;
+  border-color: #2d3a4f !important;
+}
+
+.dark-mode-wrapper .todo-form input::placeholder {
+  color: #8b9cb3 !important;
+}
+
+.dark-mode-wrapper .filter-btn {
+  border-color: #2d3a4f !important;
+  color: #8b9cb3 !important;
+}
+
+.dark-mode-wrapper .filter-btn.active {
+  color: #ffffff !important;
+}
+
+.dark-mode-wrapper .footer {
+  border-top-color: #2d3a4f !important;
+}
+/* Body ve Ekranın Tamamı İçin Karanlık Mod */
+body.dark-mode-wrapper {
+  background: #0f1419 !important;
+  color: #e8edf5 !important;
+}
+
+body.dark-mode-wrapper .app {
+  background-color: #1a2332 !important;
+  color: #e8edf5 !important;
+  border-color: #2d3a4f !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode-wrapper .todo-form input {
+  background-color: #0f1419 !important;
+  color: #ffffff !important;
+  border-color: #2d3a4f !important;
+}
+
+body.dark-mode-wrapper .todo-form input::placeholder {
+  color: #8b9cb3 !important;
 }
