@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_girXQ4d710vukGeWuBEegbiZtO47",
+      "name": "todo-app",
+      "directory": ".",
+      "orgId": "team_F63FdrEjJTh4YotPkeQS3TZS"
+    }
+  ]
+}

@@ -6,11 +6,13 @@ interface Todo {
   id: number;
   text: string;
   completed: boolean;
+  dueDate?: string; // Yeni: İsteğe bağlı son teslim tarihi
 }
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [inputText, setInputText] = useState('');
+  const [dueDate, setDueDate] = useState(''); // Yeni: Tarih inputu için state
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [darkMode, setDarkMode] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -38,7 +40,7 @@ export default function Home() {
     }
   }, [todos, isLoaded]);
 
-  // 3. Tema değiştikçe hem LocalStorage'a kaydet hem de doğrudan <body> etiketine sınıf ekle/çıkar
+  // 3. Tema değişimi
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem('my_theme', darkMode ? 'dark' : 'light');
@@ -58,10 +60,12 @@ export default function Home() {
       id: Date.now(),
       text: inputText.trim(),
       completed: false,
+      dueDate: dueDate || undefined, // Tarih seçildiyse ekle
     };
 
     setTodos([...todos, newTodo]);
     setInputText('');
+    setDueDate(''); // Eklendikten sonra tarih inputunu sıfırla
   };
 
   const toggleTodo = (id: number) => {
@@ -78,6 +82,46 @@ export default function Home() {
 
   const clearCompleted = () => {
     setTodos(todos.filter((todo) => !todo.completed));
+  };
+
+  // Tarih rozeti ve durumunu hesaplayan fonksiyon
+  const getDueDateBadge = (dateString?: string) => {
+    if (!dateString) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const targetDate = new Date(dateString);
+    targetDate.setHours(0, 0, 0, 0);
+
+    const diffTime = targetDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return (
+        <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', background: '#ffebee', color: '#c62828', fontWeight: 'bold' }}>
+          🔴 {Math.abs(diffDays)} gün geçti
+        </span>
+      );
+    } else if (diffDays === 0) {
+      return (
+        <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', background: '#fff8e1', color: '#f57f17', fontWeight: 'bold' }}>
+          🟡 Bugün
+        </span>
+      );
+    } else if (diffDays === 1) {
+      return (
+        <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', background: '#e3f2fd', color: '#1565c0', fontWeight: 'bold' }}>
+          🔵 Yarın
+        </span>
+      );
+    } else {
+      return (
+        <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)' }}>
+          📅 {diffDays} gün kaldı
+        </span>
+      );
+    }
   };
 
   const filteredTodos = todos.filter((todo) => {
@@ -112,7 +156,7 @@ export default function Home() {
         </button>
       </header>
 
-      <form onSubmit={handleSubmit} className="todo-form" autoComplete="off">
+      <form onSubmit={handleSubmit} className="todo-form" autoComplete="off" style={{ display: 'flex', gap: '8px' }}>
         <input
           id="todo-input"
           type="text"
@@ -121,6 +165,20 @@ export default function Home() {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           required
+          style={{ flex: 1 }}
+        />
+        <input
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          style={{
+            padding: '8px',
+            borderRadius: '6px',
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            cursor: 'pointer'
+          }}
         />
         <button type="submit" aria-label="Görev ekle">
           Ekle
@@ -162,13 +220,15 @@ export default function Home() {
               padding: '8px 0',
               textDecoration: todo.completed ? 'line-through' : 'none',
               opacity: todo.completed ? 0.6 : 1,
+              gap: '8px'
             }}
           >
             <span
               onClick={() => toggleTodo(todo.id)}
-              style={{ cursor: 'pointer', flex: 1 }}
+              style={{ cursor: 'pointer', flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}
             >
               {todo.completed ? '✅ ' : '⭕ '} {todo.text}
+              {getDueDateBadge(todo.dueDate)}
             </span>
             <button
               onClick={() => deleteTodo(todo.id)}
@@ -197,4 +257,4 @@ export default function Home() {
       </footer>
     </main>
   );
-} 
+}
