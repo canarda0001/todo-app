@@ -8,7 +8,7 @@ interface Todo {
   text: string;
   completed: boolean;
   dueDate?: string;
-  priority: 'low' | 'medium' | 'high'; // Yeni: Öncelik seviyesi
+  priority: 'low' | 'medium' | 'high';
 }
 
 export default function Home() {
@@ -17,7 +17,6 @@ export default function Home() {
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   
-  // Satır içi düzenleme state'leri
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
 
@@ -72,7 +71,7 @@ export default function Home() {
     setTodos([...todos, newTodo]);
     setInputText('');
     setDueDate('');
-    setPriority('medium'); // Formu sıfırla
+    setPriority('medium');
   };
 
   const toggleTodo = (id: number) => {
@@ -81,7 +80,6 @@ export default function Home() {
         if (todo.id === id) {
           const isCompleting = !todo.completed;
           
-          // Eğer görev tamamlanıyorsa konfeti patlat
           if (isCompleting) {
             confetti({
               particleCount: 100,
@@ -106,7 +104,6 @@ export default function Home() {
     setTodos(todos.filter((todo) => !todo.completed));
   };
 
-  // Düzenleme Fonksiyonları
   const startEditing = (todo: Todo) => {
     setEditingId(todo.id);
     setEditText(todo.text);
@@ -127,7 +124,8 @@ export default function Home() {
     targetDate.setHours(0, 0, 0, 0);
     const diffDays = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: '#ffebee', color: '#c62828', fontWeight: 'bold' }}>🔴 Geçi</span>;
+    // 1. İSTEK: "Geçti" ve gün sayısı düzeltildi
+    if (diffDays < 0) return <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: '#ffebee', color: '#c62828', fontWeight: 'bold' }}>🔴 {Math.abs(diffDays)} gün geçti</span>;
     if (diffDays === 0) return <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: '#fff8e1', color: '#f57f17', fontWeight: 'bold' }}>🟡 Bugün</span>;
     if (diffDays === 1) return <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: '#e3f2fd', color: '#1565c0', fontWeight: 'bold' }}>🔵 Yarın</span>;
     return <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)' }}>📅 {diffDays} gün kaldı</span>;
@@ -175,11 +173,18 @@ export default function Home() {
           style={{ flex: '1 1 200px' }}
         />
         
-        {/* Öncelik Seçici */}
+        {/* 2. İSTEK: Öncelik kutusunun arka planı temaya bağlandı */}
         <select 
           value={priority} 
           onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
-          style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}
+          style={{ 
+            padding: '8px', 
+            borderRadius: '6px', 
+            border: `1px solid ${darkMode ? '#555' : '#ccc'}`, 
+            background: darkMode ? '#333' : '#fff', 
+            color: darkMode ? '#fff' : '#000', 
+            cursor: 'pointer' 
+          }}
         >
           <option value="high">🔴 Yüksek</option>
           <option value="medium">🟡 Orta</option>
@@ -190,7 +195,14 @@ export default function Home() {
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}
+          style={{ 
+            padding: '8px', 
+            borderRadius: '6px', 
+            border: `1px solid ${darkMode ? '#555' : '#ccc'}`, 
+            background: darkMode ? '#333' : '#fff', 
+            color: darkMode ? '#fff' : '#000', 
+            cursor: 'pointer' 
+          }}
         />
         <button type="submit" aria-label="Görev ekle">Ekle</button>
       </form>
@@ -214,7 +226,7 @@ export default function Home() {
               
               <span title="Öncelik">{getPriorityBadge(todo.priority)}</span>
 
-              {/* Satır İçi Düzenleme Mantığı */}
+              {/* 3. İSTEK: Düzenleme sadece kalem ikonuna basınca açılacak */}
               {editingId === todo.id ? (
                 <input
                   type="text"
@@ -223,12 +235,21 @@ export default function Home() {
                   onBlur={() => saveEdit(todo.id)}
                   onKeyDown={(e) => e.key === 'Enter' && saveEdit(todo.id)}
                   autoFocus
-                  style={{ flex: 1, padding: '4px 8px', borderRadius: '4px', border: '1px solid #0070f3', outline: 'none', background: 'var(--surface)', color: 'var(--text)' }}
+                  style={{ flex: 1, padding: '4px 8px', borderRadius: '4px', border: `1px solid ${darkMode ? '#555' : '#ccc'}`, outline: 'none', background: darkMode ? '#333' : '#fff', color: darkMode ? '#fff' : '#000' }}
                 />
               ) : (
-                <span onClick={() => startEditing(todo)} style={{ cursor: 'text', flex: 1 }}>
-                  {todo.text}
-                </span>
+                <>
+                  <span style={{ flex: 1 }}>
+                    {todo.text}
+                  </span>
+                  <button 
+                    onClick={() => startEditing(todo)} 
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '14px', padding: '4px' }}
+                    title="Düzenle"
+                  >
+                    ✏️
+                  </button>
+                </>
               )}
 
               {getDueDateBadge(todo.dueDate)}
