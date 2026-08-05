@@ -124,11 +124,10 @@ export default function Home() {
     targetDate.setHours(0, 0, 0, 0);
     const diffDays = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-    // 1. İSTEK: "Geçti" ve gün sayısı düzeltildi
-    if (diffDays < 0) return <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: '#ffebee', color: '#c62828', fontWeight: 'bold' }}>🔴 {Math.abs(diffDays)} gün geçti</span>;
-    if (diffDays === 0) return <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: '#fff8e1', color: '#f57f17', fontWeight: 'bold' }}>🟡 Bugün</span>;
-    if (diffDays === 1) return <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: '#e3f2fd', color: '#1565c0', fontWeight: 'bold' }}>🔵 Yarın</span>;
-    return <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)' }}>📅 {diffDays} gün kaldı</span>;
+    if (diffDays < 0) return <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', background: '#ffebee', color: '#c62828', fontWeight: 'bold', whiteSpace: 'nowrap' }}>🔴 {Math.abs(diffDays)} gün geçti</span>;
+    if (diffDays === 0) return <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', background: '#fff8e1', color: '#f57f17', fontWeight: 'bold', whiteSpace: 'nowrap' }}>🟡 Bugün</span>;
+    if (diffDays === 1) return <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', background: '#e3f2fd', color: '#1565c0', fontWeight: 'bold', whiteSpace: 'nowrap' }}>🔵 Yarın</span>;
+    return <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>📅 {diffDays} gün kaldı</span>;
   };
 
   const getPriorityBadge = (p: string) => {
@@ -173,15 +172,14 @@ export default function Home() {
           style={{ flex: '1 1 200px' }}
         />
         
-        {/* 2. İSTEK: Öncelik kutusunun arka planı temaya bağlandı */}
         <select 
           value={priority} 
           onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
           style={{ 
             padding: '8px', 
             borderRadius: '6px', 
-            border: `1px solid ${darkMode ? '#555' : '#ccc'}`, 
-            background: darkMode ? '#333' : '#fff', 
+            border: `1px solid ${darkMode ? '#555' : 'var(--border)'}`, 
+            background: darkMode ? '#222' : '#fff', 
             color: darkMode ? '#fff' : '#000', 
             cursor: 'pointer' 
           }}
@@ -198,8 +196,8 @@ export default function Home() {
           style={{ 
             padding: '8px', 
             borderRadius: '6px', 
-            border: `1px solid ${darkMode ? '#555' : '#ccc'}`, 
-            background: darkMode ? '#333' : '#fff', 
+            border: `1px solid ${darkMode ? '#555' : 'var(--border)'}`, 
+            background: darkMode ? '#222' : '#fff', 
             color: darkMode ? '#fff' : '#000', 
             cursor: 'pointer' 
           }}
@@ -217,16 +215,15 @@ export default function Home() {
         {filteredTodos.map((todo) => (
           <li
             key={todo.id}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', textDecoration: todo.completed ? 'line-through' : 'none', opacity: todo.completed ? 0.6 : 1, gap: '8px' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)', textDecoration: todo.completed ? 'line-through' : 'none', opacity: todo.completed ? 0.6 : 1, gap: '8px' }}
           >
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
               <span onClick={() => toggleTodo(todo.id)} style={{ cursor: 'pointer', fontSize: '18px' }}>
                 {todo.completed ? '✅' : '⭕'}
               </span>
               
               <span title="Öncelik">{getPriorityBadge(todo.priority)}</span>
 
-              {/* 3. İSTEK: Düzenleme sadece kalem ikonuna basınca açılacak */}
               {editingId === todo.id ? (
                 <input
                   type="text"
@@ -235,29 +232,30 @@ export default function Home() {
                   onBlur={() => saveEdit(todo.id)}
                   onKeyDown={(e) => e.key === 'Enter' && saveEdit(todo.id)}
                   autoFocus
-                  style={{ flex: 1, padding: '4px 8px', borderRadius: '4px', border: `1px solid ${darkMode ? '#555' : '#ccc'}`, outline: 'none', background: darkMode ? '#333' : '#fff', color: darkMode ? '#fff' : '#000' }}
+                  style={{ flex: 1, padding: '4px 8px', borderRadius: '4px', border: '1px solid #0070f3', outline: 'none', background: darkMode ? '#222' : '#fff', color: darkMode ? '#fff' : '#000' }}
                 />
               ) : (
                 <>
-                  <span style={{ flex: 1 }}>
+                  <span style={{ flex: 1, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
                     {todo.text}
                   </span>
                   <button 
                     onClick={() => startEditing(todo)} 
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '14px', padding: '4px' }}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '4px' }}
                     title="Düzenle"
                   >
                     ✏️
                   </button>
                 </>
               )}
-
-              {getDueDateBadge(todo.dueDate)}
             </div>
 
-            <button onClick={() => deleteTodo(todo.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'red' }}>
-              ❌
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {getDueDateBadge(todo.dueDate)}
+              <button onClick={() => deleteTodo(todo.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'red', fontSize: '16px' }}>
+                ❌
+              </button>
+            </div>
           </li>
         ))}
       </ul>
