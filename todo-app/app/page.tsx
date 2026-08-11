@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// iconoir ikonlarimiz yine sahnede
+// ikon paketinden lazim olanlari cektik
 import { Plus, CheckCircleSolid, Circle, Trash, EditPencil, Calendar, SunLight, HalfMoon } from 'iconoir-react';
 
 interface Todo {
@@ -16,61 +16,62 @@ export default function Home() {
   const [yeniGorev, setYeniGorev] = useState('');
   const [secilenTarih, setSecilenTarih] = useState('');
   
-  // duzenleme isleri
+  // edit isleri icin tuttugumuz stateler
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
 
-  // sol menudeki gorumum filtresi
+  // sol menudeki secili sekmeyi anliyoruz (hepsi, aktif, biten)
   const [filtre, setFiltre] = useState<'hepsi' | 'aktif' | 'biten'>('hepsi');
 
   const [darkMode, setDarkMode] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // 1. Ilk acilista eski verileri hafizadan toparliyoruz
+  // 1. Sayfa acildiginda local'den verileri toparla
   useEffect(() => {
-    // matcha temasi icin ozel key verdik
-    const kayitliGorevler = localStorage.getItem('my_todos_matcha');
-    const kayitliTema = localStorage.getItem('my_theme_matcha');
+    // cyber tema icin farkli key verdik ki eski verilerle gümlemesin
+    const kayitliGorevler = localStorage.getItem('my_todos_cyber_clean');
+    const kayitliTema = localStorage.getItem('my_theme_cyber_clean');
 
     if (kayitliGorevler) {
       try { 
         setTodos(JSON.parse(kayitliGorevler)); 
       } catch (e) {
-        console.log("Veri cekerken ufak bi takildik:", e);
+        console.log("Localstorage'dan veri cekerken patladik:", e);
       }
     }
     if (kayitliTema) {
       setDarkMode(kayitliTema === 'dark');
     }
-    setIsLoaded(true); // sayfa render olana kadar bekle diyoruz
+    setIsLoaded(true); // hydration hatasindan yirtmak icin
   }, []);
 
-  // 2. Arka plan ve organik Zen renk paleti ayarlari
+  // 2. Arka plan ve neon (cyber) gradient ayarlari
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('my_todos_matcha', JSON.stringify(todos));
-      localStorage.setItem('my_theme_matcha', darkMode ? 'dark' : 'light');
+      localStorage.setItem('my_todos_cyber_clean', JSON.stringify(todos));
+      localStorage.setItem('my_theme_cyber_clean', darkMode ? 'dark' : 'light');
       
       document.body.style.margin = '0';
-      document.body.style.overflow = 'hidden'; 
+      document.body.style.overflow = 'hidden'; // sag taraf kendi icinde scroll olacak
       document.body.style.transition = 'background 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
 
-      // Doga ve Matcha yesili tonlari
+      // Cyberpunk hacker renklerimiz 
       if (darkMode) {
-        // Koyu orman yesili ve komur grisi
-        document.body.style.background = 'linear-gradient(135deg, #1c1917 0%, #14532d 100%)';
-        document.body.style.color = '#fef3c7'; // acik krem yazi
+        // Gece mavisi ve derin mor
+        document.body.style.background = 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)';
+        document.body.style.color = '#e0e0e0';
       } else {
-        // Acik krem ve ferah matcha yesili
-        document.body.style.background = 'linear-gradient(135deg, #fdfbf7 0%, #ecfccb 100%)';
-        document.body.style.color = '#1c1917'; // koyu kahve/gri yazi
+        // Acik synthwave tonlari
+        document.body.style.background = 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)';
+        document.body.style.color = '#120428';
       }
     }
   }, [todos, darkMode, isLoaded]);
 
   const gorevEkle = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!yeniGorev.trim()) return; // boslugu engelle
+    // adam bos basarsa hic ugrasma direkt sal
+    if (!yeniGorev.trim()) return; 
 
     const yeniItem = {
       id: Date.now(),
@@ -79,7 +80,7 @@ export default function Home() {
       dueDate: secilenTarih || undefined,
     };
 
-    setTodos([yeniItem, ...todos]); 
+    setTodos([yeniItem, ...todos]); // uste eklensin diye boyle yaptik
     setYeniGorev('');
     setSecilenTarih('');
   };
@@ -102,17 +103,19 @@ export default function Home() {
     setEditingId(null);
   };
 
+  // Ekrana basilacak olanlari filtreliyoruz
   const gosterilecekler = todos.filter(todo => {
     if (filtre === 'aktif') return !todo.completed;
     if (filtre === 'biten') return todo.completed;
     return true; 
   });
 
+  // Sol menudeki sayaclar
   const toplamSayi = todos.length;
   const aktifSayi = todos.filter(t => !t.completed).length;
   const bitenSayi = toplamSayi - aktifSayi;
 
-  // Organik renklere uygun tarih rozeti
+  // Tarihi neon renklerle sekilli gosterme fonksiyonu
   const afilliTarih = (tarih?: string) => {
     if (!tarih) return null;
     
@@ -126,23 +129,23 @@ export default function Home() {
     let yazi = "";
     let renk = "";
 
-    // Doga tonlarina uygun rozetler
+    // Neon vurgu renklerini duruma gore ayarladik
     if (farkGun < 0) { 
       yazi = `${Math.abs(farkGun)} gün geçti`; 
-      renk = "#ea580c"; // toprak turuncusu/kirmizisi
+      renk = "#ff003c"; 
     } else if (farkGun === 0) { 
       yazi = "Bugün"; 
-      renk = darkMode ? "#bef264" : "#65a30d"; // canli limon/matcha yesili
+      renk = darkMode ? "#f0f" : "#d100d1"; 
     } else if (farkGun === 1) { 
       yazi = "Yarın"; 
-      renk = darkMode ? "#6ee7b7" : "#059669"; // nane yesili
+      renk = darkMode ? "#00f2fe" : "#005bea"; 
     } else { 
       yazi = `${farkGun} gün kaldı`; 
-      renk = darkMode ? '#a8a29e' : '#78716c'; // tas grisi
+      renk = darkMode ? '#a29bfe' : '#6c5ce7'; 
     }
 
     return (
-      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: renk, fontWeight: 700, background: darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)', padding: '4px 10px', borderRadius: '8px', border: `1px solid ${renk}44` }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: renk, fontWeight: 700, background: darkMode ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.6)', padding: '4px 10px', borderRadius: '8px', border: `1px solid ${renk}55` }}>
         <Calendar width={16} height={16} />
         {yazi}
       </span>
@@ -151,19 +154,19 @@ export default function Home() {
 
   if (!isLoaded) return null;
 
-  // Zen stili yumusak cam efekti
+  // Internetten arakladigim neon cyberpunk cam stilleri
   const anaCamStili = {
-    background: darkMode ? 'rgba(20, 83, 45, 0.3)' : 'rgba(255, 255, 255, 0.6)',
-    backdropFilter: 'blur(24px)',
-    WebkitBackdropFilter: 'blur(24px)',
-    borderRight: darkMode ? '1px solid rgba(190, 242, 100, 0.1)' : '1px solid rgba(77, 124, 15, 0.1)',
-    boxShadow: darkMode ? '0 0 40px rgba(0, 0, 0, 0.3)' : '0 10px 40px rgba(0, 0, 0, 0.03)'
+    background: darkMode ? 'rgba(15, 12, 41, 0.7)' : 'rgba(255, 255, 255, 0.5)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    borderRight: darkMode ? '1px solid rgba(0, 242, 254, 0.2)' : '1px solid rgba(142, 197, 252, 0.5)',
+    boxShadow: darkMode ? '0 0 30px rgba(0, 242, 254, 0.1)' : '0 10px 30px rgba(0, 0, 0, 0.05)'
   };
 
   const formCamStili = {
-    background: darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.7)',
-    backdropFilter: 'blur(12px)',
-    border: darkMode ? '1px solid rgba(190, 242, 100, 0.1)' : '1px solid rgba(255, 255, 255, 0.8)',
+    background: darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.7)',
+    backdropFilter: 'blur(10px)',
+    border: darkMode ? '1px solid rgba(255, 0, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.8)',
     borderRadius: '16px'
   };
 
@@ -173,106 +176,107 @@ export default function Home() {
       {/* SOL TARAFTAKI MENU KISMI */}
       <aside style={{ width: '280px', padding: '30px 20px', display: 'flex', flexDirection: 'column', gap: '30px', ...anaCamStili }}>
         
-        {/* Logo ve tema butonu */}
+        {/* En ustteki logo ve gece gunduz butonu */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: 800, margin: 0, letterSpacing: '-0.5px', background: darkMode ? 'linear-gradient(to right, #bef264, #fef3c7)' : 'linear-gradient(to right, #4d7c0f, #1c1917)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>ZenTask</h1>
+          <h1 style={{ fontSize: '26px', fontWeight: 900, margin: 0, letterSpacing: '1px', background: darkMode ? 'linear-gradient(to right, #00f2fe, #4facfe)' : 'linear-gradient(to right, #6c5ce7, #a29bfe)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: darkMode ? '0 0 20px rgba(0,242,254,0.3)' : 'none' }}>Görevlerim</h1>
           <button 
             onClick={() => setDarkMode(!darkMode)}
-            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: darkMode ? '#bef264' : '#4d7c0f', display: 'flex' }}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: darkMode ? '#00f2fe' : '#6c5ce7', display: 'flex' }}
           >
             {darkMode ? <SunLight width={24} height={24} /> : <HalfMoon width={24} height={24} />}
           </button>
         </div>
 
-        {/* Filtre sekmeleri */}
+        {/* Sekmeler */}
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: darkMode ? '#a8a29e' : '#78716c', textTransform: 'uppercase', letterSpacing: '2px', paddingLeft: '10px', marginBottom: '4px' }}>Odak</p>
+          <p style={{ fontSize: '11px', fontWeight: 800, color: darkMode ? '#a29bfe' : '#6c5ce7', textTransform: 'uppercase', letterSpacing: '3px', paddingLeft: '10px', marginBottom: '4px' }}>Görünüm</p>
           
           {(['hepsi', 'aktif', 'biten'] as const).map((durum) => (
             <button
               key={durum}
               onClick={() => setFiltre(durum)}
               style={{
-                background: filtre === durum ? (darkMode ? 'rgba(190, 242, 100, 0.1)' : 'rgba(77, 124, 15, 0.08)') : 'transparent',
+                background: filtre === durum ? (darkMode ? 'rgba(0, 242, 254, 0.15)' : 'rgba(108, 92, 231, 0.15)') : 'transparent',
                 border: 'none',
                 padding: '12px 16px',
                 borderRadius: '12px',
                 cursor: 'pointer',
                 textAlign: 'left',
-                color: filtre === durum ? (darkMode ? '#bef264' : '#4d7c0f') : (darkMode ? '#d6d3d1' : '#57534e'),
+                color: filtre === durum ? (darkMode ? '#00f2fe' : '#6c5ce7') : (darkMode ? '#b2bec3' : '#2d3436'),
                 fontWeight: filtre === durum ? 700 : 500,
                 transition: 'all 0.3s ease',
                 textTransform: 'capitalize',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px'
+                gap: '10px',
+                boxShadow: filtre === durum && darkMode ? 'inset 2px 0 0 #00f2fe' : 'none' // seciliyse soldan cizgi veriyor
               }}
             >
-              {durum === 'hepsi' ? 'Tüm Notlar' : durum === 'aktif' ? 'Bekleyenler' : 'Bitenler'}
+              {durum === 'hepsi' ? 'Tüm Görevler' : durum === 'aktif' ? 'Bekleyenler' : 'Tamamlananlar'}
             </button>
           ))}
         </nav>
 
         {/* Istatistik Paneli */}
         <div style={{ marginTop: 'auto', padding: '20px', ...formCamStili }}>
-          <h3 style={{ fontSize: '12px', margin: '0 0 16px 0', color: darkMode ? '#bef264' : '#4d7c0f', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Zihin Özeti</h3>
+          <h3 style={{ fontSize: '12px', margin: '0 0 16px 0', color: darkMode ? '#f0f' : '#d100d1', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 800 }}>Özet Paneli</h3>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontSize: '13px', color: darkMode ? '#a8a29e' : '#78716c', fontWeight: 500 }}>Toplam</span>
-            <span style={{ fontWeight: 700 }}>{toplamSayi}</span>
+            <span style={{ fontSize: '13px', color: darkMode ? '#b2bec3' : '#636e72', fontWeight: 600 }}>Toplam</span>
+            <span style={{ fontWeight: 800 }}>{toplamSayi}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontSize: '13px', color: darkMode ? '#a8a29e' : '#78716c', fontWeight: 500 }}>Aktif</span>
-            <span style={{ fontWeight: 700, color: darkMode ? '#bef264' : '#4d7c0f' }}>{aktifSayi}</span>
+            <span style={{ fontSize: '13px', color: darkMode ? '#b2bec3' : '#636e72', fontWeight: 600 }}>Aktif</span>
+            <span style={{ fontWeight: 800, color: darkMode ? '#00f2fe' : '#0984e3' }}>{aktifSayi}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '13px', color: darkMode ? '#a8a29e' : '#78716c', fontWeight: 500 }}>Biten</span>
-            <span style={{ fontWeight: 700, opacity: 0.5 }}>{bitenSayi}</span>
+            <span style={{ fontSize: '13px', color: darkMode ? '#b2bec3' : '#636e72', fontWeight: 600 }}>Biten</span>
+            <span style={{ fontWeight: 800, opacity: 0.5 }}>{bitenSayi}</span>
           </div>
         </div>
       </aside>
 
-      {/* SAG TARAF - Ana not listesi */}
+      {/* SAG TARAF - Ana liste */}
       <main style={{ flex: 1, overflowY: 'auto', padding: '50px 80px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           
           <header style={{ marginBottom: '50px' }}>
-            <h2 style={{ fontSize: '42px', fontWeight: 800, margin: '0 0 10px 0', letterSpacing: '-1px' }}>
-              {filtre === 'hepsi' ? 'Tüm Notlar' : filtre === 'aktif' ? 'Bekleyenler' : 'Bitenler'}
+            <h2 style={{ fontSize: '42px', fontWeight: 900, margin: '0 0 10px 0', letterSpacing: '-1px' }}>
+              {filtre === 'hepsi' ? 'Tüm Görevler' : filtre === 'aktif' ? 'Yapılacaklar' : 'Bitenler'}
             </h2>
-            <p style={{ fontSize: '16px', color: darkMode ? '#a8a29e' : '#78716c', margin: 0, fontWeight: 500 }}>Zihnini boşalt, buraya yaz.</p>
+            <p style={{ fontSize: '16px', color: darkMode ? '#00f2fe' : '#6c5ce7', margin: 0, fontWeight: 500 }}>Ajandanızı buradan yönetin.</p>
           </header>
 
-          {/* Ekleme formu */}
+          {/* Form */}
           <form onSubmit={gorevEkle} style={{ 
             display: 'flex', 
             gap: '16px', 
             marginBottom: '50px', 
             padding: '14px', 
             ...formCamStili,
-            boxShadow: darkMode ? '0 4px 20px rgba(0,0,0,0.2)' : '0 4px 20px rgba(0,0,0,0.02)'
+            boxShadow: darkMode ? '0 0 20px rgba(255, 0, 255, 0.1)' : '0 4px 20px rgba(0,0,0,0.05)'
           }}>
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '0 12px' }}>
-              <Plus width={24} height={24} color={darkMode ? '#bef264' : '#4d7c0f'} />
+              <Plus width={24} height={24} color={darkMode ? '#f0f' : '#6c5ce7'} />
               <input
                 type="text"
-                placeholder="Aklındakini yazıya dök..."
+                placeholder="Yeni bir hedef belirleyin..."
                 value={yeniGorev}
                 onChange={(e) => setYeniGorev(e.target.value)}
                 required
-                style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', outline: 'none', color: darkMode ? '#fef3c7' : '#1c1917', fontSize: '17px', fontWeight: 500 }}
+                style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', outline: 'none', color: darkMode ? '#fff' : '#2d3436', fontSize: '17px', fontWeight: 600 }}
               />
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', borderLeft: darkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)', paddingLeft: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', borderLeft: darkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', paddingLeft: '16px' }}>
               <input
                 type="date"
                 value={secilenTarih}
                 onChange={(e) => setSecilenTarih(e.target.value)}
-                style={{ background: 'transparent', border: 'none', color: darkMode ? '#a8a29e' : '#78716c', outline: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, fontSize: '14px' }}
+                style={{ background: 'transparent', border: 'none', color: darkMode ? '#00f2fe' : '#6c5ce7', outline: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '14px' }}
               />
             </div>
             
-            <button type="submit" style={{ background: darkMode ? 'rgba(190, 242, 100, 0.15)' : '#ecfccb', color: darkMode ? '#bef264' : '#3f6212', border: darkMode ? '1px solid rgba(190, 242, 100, 0.3)' : '1px solid #d9f99d', padding: '0 28px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '15px', transition: 'all 0.2s' }}>
+            <button type="submit" style={{ background: darkMode ? 'transparent' : '#6c5ce7', color: darkMode ? '#f0f' : '#fff', border: darkMode ? '2px solid #f0f' : 'none', padding: '0 28px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', fontSize: '15px', transition: 'all 0.2s', boxShadow: darkMode ? '0 0 10px rgba(255, 0, 255, 0.3)' : '0 4px 14px rgba(108, 92, 231, 0.4)' }}>
               Ekle
             </button>
           </form>
@@ -285,18 +289,18 @@ export default function Home() {
                 alignItems: 'center', 
                 gap: '20px', 
                 padding: '22px 28px', 
-                opacity: todo.completed ? 0.5 : 1, 
+                opacity: todo.completed ? 0.4 : 1, 
                 transition: 'all 0.3s ease',
-                background: darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)',
+                background: darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.7)',
                 backdropFilter: 'blur(10px)',
-                borderTop: darkMode ? '1px solid rgba(255, 255, 255, 0.03)' : '1px solid rgba(0, 0, 0, 0.03)',
-                borderRight: darkMode ? '1px solid rgba(255, 255, 255, 0.03)' : '1px solid rgba(0, 0, 0, 0.03)',
-                borderBottom: darkMode ? '1px solid rgba(255, 255, 255, 0.03)' : '1px solid rgba(0, 0, 0, 0.03)',
-                borderLeft: todo.completed ? '4px solid #78716c' : (darkMode ? '4px solid #bef264' : '4px solid #4d7c0f'),
+                borderTop: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
+                borderRight: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
+                borderBottom: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
+                borderLeft: todo.completed ? '4px solid #636e72' : (darkMode ? '4px solid #00f2fe' : '4px solid #6c5ce7'),
                 borderRadius: '16px'
               }}>
                 
-                <button onClick={() => durumuDegistir(todo.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0, color: todo.completed ? (darkMode ? '#78716c' : '#a8a29e') : (darkMode ? '#bef264' : '#4d7c0f') }}>
+                <button onClick={() => durumuDegistir(todo.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0, color: todo.completed ? (darkMode ? '#636e72' : '#b2bec3') : (darkMode ? '#00f2fe' : '#6c5ce7') }}>
                   {todo.completed ? <CheckCircleSolid width={28} height={28} /> : <Circle width={28} height={28} />}
                 </button>
 
@@ -309,10 +313,10 @@ export default function Home() {
                       onBlur={() => duzenlemeyiKaydet(todo.id)}
                       onKeyDown={(e) => e.key === 'Enter' && duzenlemeyiKaydet(todo.id)}
                       autoFocus
-                      style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: 'none', borderBottom: `2px solid ${darkMode ? '#bef264' : '#4d7c0f'}`, outline: 'none', color: darkMode ? '#fef3c7' : '#1c1917', fontSize: '17px', padding: '4px 8px', borderRadius: '4px', fontWeight: 500 }}
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: 'none', borderBottom: `2px solid ${darkMode ? '#f0f' : '#6c5ce7'}`, outline: 'none', color: darkMode ? '#fff' : '#2d3436', fontSize: '17px', padding: '4px 8px', borderRadius: '4px', fontWeight: 600 }}
                     />
                   ) : (
-                    <span style={{ fontSize: '17px', fontWeight: 500, textDecoration: todo.completed ? 'line-through' : 'none', color: darkMode ? '#fef3c7' : '#1c1917' }}>
+                    <span style={{ fontSize: '17px', fontWeight: 600, textDecoration: todo.completed ? 'line-through' : 'none', color: darkMode ? '#fff' : '#2d3436' }}>
                       {todo.text}
                     </span>
                   )}
@@ -321,21 +325,21 @@ export default function Home() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px', opacity: todo.completed ? 0 : 1, transition: 'opacity 0.2s' }}>
-                  <button onClick={() => duzenlemeyeBasla(todo)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: darkMode ? '#bef264' : '#4d7c0f', padding: '8px' }}>
+                  <button onClick={() => duzenlemeyeBasla(todo)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: darkMode ? '#00f2fe' : '#6c5ce7', padding: '8px' }}>
                     <EditPencil width={22} height={22} />
                   </button>
-                  <button onClick={() => goreviUcur(todo.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ea580c', padding: '8px' }}>
+                  <button onClick={() => goreviUcur(todo.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ff003c', padding: '8px' }}>
                     <Trash width={22} height={22} />
                   </button>
                 </div>
               </div>
             ))}
 
-            {/* Liste bosken cikacak yazi */}
+            {/* Listede eleman yoksa bos gorunmesin diye */}
             {gosterilecekler.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '80px 0', opacity: 0.6 }}>
-                <CheckCircleSolid width={56} height={56} color={darkMode ? '#bef264' : '#4d7c0f'} style={{ marginBottom: '16px', opacity: 0.5 }} />
-                <h3 style={{ fontSize: '18px', margin: '0 0 8px 0', fontWeight: 500, color: darkMode ? '#fef3c7' : '#1c1917' }}>Yapılacak hiçbir şey kalmadı, anın tadını çıkar.</h3>
+              <div style={{ textAlign: 'center', padding: '80px 0', opacity: 0.5 }}>
+                <CheckCircleSolid width={56} height={56} color={darkMode ? '#00f2fe' : '#6c5ce7'} style={{ marginBottom: '16px', opacity: 0.5 }} />
+                <h3 style={{ fontSize: '18px', margin: '0 0 8px 0', fontWeight: 600, color: darkMode ? '#fff' : '#2d3436', letterSpacing: '1px' }}>Listeniz şu an boş.</h3>
               </div>
             )}
           </div>
