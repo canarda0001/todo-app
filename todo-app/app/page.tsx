@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// ikon paketinden lazim olanlari cektik
 import { Plus, CheckCircleSolid, Circle, Trash, EditPencil, Calendar, SunLight, HalfMoon } from 'iconoir-react';
+// Sürükle-bırak ve akıcı animasyonlar için framer-motion'ı çağırıyoruz
+import { motion, Reorder } from 'framer-motion';
 
 interface Todo {
   id: number;
@@ -31,19 +32,15 @@ export default function Home() {
 
   // 1. Ekran boyutunu dinleme ve Local'den veri cekme isleri
   useEffect(() => {
-    // Ekranin anlik genisligini olcup telefonda miyiz bakiyoruz
     const ekraniKontrolEt = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
-    // ilk acilista bi kere calistir
     ekraniKontrolEt();
-    // pencere boyutu degistikce dinlemeye devam et
     window.addEventListener('resize', ekraniKontrolEt);
 
-    // cyber tema icin farkli key verdik ki eski verilerle gümlemesin
-    const kayitliGorevler = localStorage.getItem('my_todos_cyber_clean');
-    const kayitliTema = localStorage.getItem('my_theme_cyber_clean');
+    const kayitliGorevler = localStorage.getItem('my_todos_drag');
+    const kayitliTema = localStorage.getItem('my_theme_drag');
 
     if (kayitliGorevler) {
       try { 
@@ -56,30 +53,25 @@ export default function Home() {
       setDarkMode(kayitliTema === 'dark');
     }
     
-    setIsLoaded(true); // hydration hatasindan yirtmak icin
+    setIsLoaded(true); 
 
-    // component ölünce (kapaninca) event listener'i temizle
     return () => window.removeEventListener('resize', ekraniKontrolEt);
   }, []);
 
   // 2. Arka plan ve neon (cyber) gradient ayarlari
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('my_todos_cyber_clean', JSON.stringify(todos));
-      localStorage.setItem('my_theme_cyber_clean', darkMode ? 'dark' : 'light');
+      localStorage.setItem('my_todos_drag', JSON.stringify(todos));
+      localStorage.setItem('my_theme_drag', darkMode ? 'dark' : 'light');
       
       document.body.style.margin = '0';
-      // mobilde asagi kaydirabilmek icin overflow'u auto yapiyoruz
       document.body.style.overflow = isMobile ? 'auto' : 'hidden'; 
       document.body.style.transition = 'background 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
 
-      // Cyberpunk hacker renklerimiz 
       if (darkMode) {
-        // Gece mavisi ve derin mor
         document.body.style.background = 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)';
         document.body.style.color = '#e0e0e0';
       } else {
-        // Acik synthwave tonlari
         document.body.style.background = 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)';
         document.body.style.color = '#120428';
       }
@@ -88,7 +80,6 @@ export default function Home() {
 
   const gorevEkle = (e: React.FormEvent) => {
     e.preventDefault();
-    // adam bos basarsa hic ugrasma direkt sal
     if (!yeniGorev.trim()) return; 
 
     const yeniItem = {
@@ -98,7 +89,7 @@ export default function Home() {
       dueDate: secilenTarih || undefined,
     };
 
-    setTodos([yeniItem, ...todos]); // uste eklensin diye boyle yaptik
+    setTodos([yeniItem, ...todos]); 
     setYeniGorev('');
     setSecilenTarih('');
   };
@@ -128,12 +119,10 @@ export default function Home() {
     return true; 
   });
 
-  // Sol menudeki sayaclar
   const toplamSayi = todos.length;
   const aktifSayi = todos.filter(t => !t.completed).length;
   const bitenSayi = toplamSayi - aktifSayi;
 
-  // Tarihi neon renklerle sekilli gosterme fonksiyonu
   const afilliTarih = (tarih?: string) => {
     if (!tarih) return null;
     
@@ -171,12 +160,10 @@ export default function Home() {
 
   if (!isLoaded) return null;
 
-  // Internetten arakladigim neon cyberpunk cam stilleri
   const anaCamStili = {
     background: darkMode ? 'rgba(15, 12, 41, 0.7)' : 'rgba(255, 255, 255, 0.5)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
-    // Mobilde sagi degil alti ciziyoruz
     borderRight: isMobile ? 'none' : (darkMode ? '1px solid rgba(0, 242, 254, 0.2)' : '1px solid rgba(142, 197, 252, 0.5)'),
     borderBottom: isMobile ? (darkMode ? '1px solid rgba(0, 242, 254, 0.2)' : '1px solid rgba(142, 197, 252, 0.5)') : 'none',
     boxShadow: darkMode ? '0 0 30px rgba(0, 242, 254, 0.1)' : '0 10px 30px rgba(0, 0, 0, 0.05)'
@@ -190,13 +177,11 @@ export default function Home() {
   };
 
   return (
-    // Mobilde elemanlari alt alta (column), PC'de yan yana (row) diziyoruz
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: isMobile ? 'auto' : '100vh', minHeight: '100vh', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       
-      {/* SOL TARAFTAKI MENU (Mobilde ÜST MENU oluyor) */}
+      {/* SOL TARAFTAKI MENU (Görevlerim başlığının kaybolma sorunu burada düzeltildi) */}
       <aside style={{ width: isMobile ? '100%' : '280px', padding: isMobile ? '20px' : '30px 20px', display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '30px', ...anaCamStili, zIndex: 10 }}>
         
-        {/* En ustteki logo ve gece gunduz butonu */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 5px' }}>
           <h1 style={{ fontSize: isMobile ? '22px' : '26px', fontWeight: 900, margin: 0, letterSpacing: '1px', background: darkMode ? 'linear-gradient(to right, #00f2fe, #4facfe)' : 'linear-gradient(to right, #6c5ce7, #a29bfe)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: darkMode ? '0 0 20px rgba(0,242,254,0.3)' : 'none' }}>Görevlerim</h1>
           <button 
@@ -207,7 +192,6 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Sekmeler (Mobilde yan yana scroll edilebilir sekilde ayarladik) */}
         <nav style={{ display: 'flex', flexDirection: isMobile ? 'row' : 'column', gap: '8px', overflowX: isMobile ? 'auto' : 'visible', paddingBottom: isMobile ? '4px' : '0' }}>
           {!isMobile && <p style={{ fontSize: '11px', fontWeight: 800, color: darkMode ? '#a29bfe' : '#6c5ce7', textTransform: 'uppercase', letterSpacing: '3px', paddingLeft: '10px', marginBottom: '4px' }}>Görünüm</p>}
           
@@ -238,7 +222,6 @@ export default function Home() {
           ))}
         </nav>
 
-        {/* Istatistik Paneli (Mobilde cok yer kaplamasin diye gizledik) */}
         {!isMobile && (
           <div style={{ marginTop: 'auto', padding: '20px', ...formCamStili }}>
             <h3 style={{ fontSize: '12px', margin: '0 0 16px 0', color: darkMode ? '#f0f' : '#d100d1', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 800 }}>Özet Paneli</h3>
@@ -258,7 +241,7 @@ export default function Home() {
         )}
       </aside>
 
-      {/* SAG TARAF - Ana liste (Mobilde ASAGI kisim oluyor) */}
+      {/* SAG TARAF - Sürükle-Bırak destekli görev alanı */}
       <main style={{ flex: 1, overflowY: isMobile ? 'visible' : 'auto', padding: isMobile ? '24px 16px' : '50px 80px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           
@@ -269,7 +252,6 @@ export default function Home() {
             <p style={{ fontSize: isMobile ? '14px' : '16px', color: darkMode ? '#00f2fe' : '#6c5ce7', margin: 0, fontWeight: 500 }}>Ajandanızı buradan yönetin.</p>
           </header>
 
-          {/* Form (Mobilde ogeler alt alta diziliyor) */}
           <form onSubmit={gorevEkle} style={{ 
             display: 'flex', 
             flexDirection: isMobile ? 'column' : 'row',
@@ -305,30 +287,35 @@ export default function Home() {
             </button>
           </form>
 
-          {/* Todo Listesi */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Sürükle-Bırak (Reorder.Group) ile görev listesi */}
+          <Reorder.Group axis="y" values={gosterilecekler} onReorder={setTodos} style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {gosterilecekler.map((todo) => (
-              <div key={todo.id} style={{ 
-                display: 'flex', 
-                alignItems: 'flex-start', // mobilde butonlar ve yazi ayni hizada baslasin
-                gap: isMobile ? '12px' : '20px', 
-                padding: isMobile ? '18px 16px' : '22px 28px', 
-                opacity: todo.completed ? 0.4 : 1, 
-                transition: 'all 0.3s ease',
-                background: darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.7)',
-                backdropFilter: 'blur(10px)',
-                borderTop: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
-                borderRight: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
-                borderBottom: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
-                borderLeft: todo.completed ? '4px solid #636e72' : (darkMode ? '4px solid #00f2fe' : '4px solid #6c5ce7'),
-                borderRadius: '16px'
-              }}>
+              <Reorder.Item 
+                key={todo.id} 
+                value={todo}
+                whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px rgba(0,242,254,0.3)" }}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-start', 
+                  gap: isMobile ? '12px' : '20px', 
+                  padding: isMobile ? '18px 16px' : '22px 28px', 
+                  opacity: todo.completed ? 0.4 : 1, 
+                  background: darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(10px)',
+                  borderTop: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
+                  borderRight: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
+                  borderBottom: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
+                  borderLeft: todo.completed ? '4px solid #636e72' : (darkMode ? '4px solid #00f2fe' : '4px solid #6c5ce7'),
+                  borderRadius: '16px',
+                  cursor: 'grab'
+                }}
+              >
                 
                 <button onClick={() => durumuDegistir(todo.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px 0', color: todo.completed ? (darkMode ? '#636e72' : '#b2bec3') : (darkMode ? '#00f2fe' : '#6c5ce7'), flexShrink: 0 }}>
                   {todo.completed ? <CheckCircleSolid width={26} height={26} /> : <Circle width={26} height={26} />}
                 </button>
 
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 /* tasmayi engellemek icin */ }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
                   {editingId === todo.id ? (
                     <input
                       type="text"
@@ -356,17 +343,16 @@ export default function Home() {
                     <Trash width={22} height={22} />
                   </button>
                 </div>
-              </div>
+              </Reorder.Item>
             ))}
+          </Reorder.Group>
 
-            {/* Listede eleman yoksa bos gorunmesin diye */}
-            {gosterilecekler.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '60px 0', opacity: 0.5 }}>
-                <CheckCircleSolid width={56} height={56} color={darkMode ? '#00f2fe' : '#6c5ce7'} style={{ marginBottom: '16px', opacity: 0.5 }} />
-                <h3 style={{ fontSize: '18px', margin: '0 0 8px 0', fontWeight: 600, color: darkMode ? '#fff' : '#2d3436', letterSpacing: '1px' }}>Listeniz şu an boş.</h3>
-              </div>
-            )}
-          </div>
+          {gosterilecekler.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '60px 0', opacity: 0.5 }}>
+              <CheckCircleSolid width={56} height={56} color={darkMode ? '#00f2fe' : '#6c5ce7'} style={{ marginBottom: '16px', opacity: 0.5 }} />
+              <h3 style={{ fontSize: '18px', margin: '0 0 8px 0', fontWeight: 600, color: darkMode ? '#fff' : '#2d3436', letterSpacing: '1px' }}>Listeniz şu an boş.</h3>
+            </div>
+          )}
           
         </div>
       </main>
