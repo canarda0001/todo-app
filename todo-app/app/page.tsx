@@ -209,7 +209,7 @@ export default function Home() {
         </nav>
 
         {/* İstatistik Kartı */}
-        <div style={{ marginTop: 'auto', padding: '20px', borderRadius: '16px', ...inputCamStili }}>
+        <div style={{ marginTop: 'auto', padding: '20px', ...inputCamStili }}>
           <h3 style={{ fontSize: '14px', margin: '0 0 16px 0', opacity: 0.8 }}>Özet</h3>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span style={{ fontSize: '13px', opacity: 0.7 }}>Toplam</span>
