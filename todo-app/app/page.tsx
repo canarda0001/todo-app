@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, CheckCircleSolid, Circle, Trash, EditPencil, Calendar, SunLight, HalfMoon, Menu, Check, Xmark } from 'iconoir-react';
-import { motion, Reorder, useDragControls } from 'framer-motion';
+import { motion, Reorder, useDragControls, AnimatePresence } from 'framer-motion';
 
 interface Todo {
   id: number;
@@ -11,7 +11,6 @@ interface Todo {
   dueDate?: string;
 }
 
-// Rapor P0/P2: Gorev kartini ayri bir bilesen yaptik ki surukleme ve duzenleme isleri karmasiklasmasin
 const GorevKarti = ({ todo, darkMode, isMobile, durumuDegistir, goreviUcur, duzenlemeyiKaydet, afilliTarih }: any) => {
   const controls = useDragControls();
   const [isEditing, setIsEditing] = useState(false);
@@ -29,7 +28,6 @@ const GorevKarti = ({ todo, darkMode, isMobile, durumuDegistir, goreviUcur, duze
     }
   };
 
-  // Klavyeden enter/escape destegi (Rapor P0)
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') kaydet();
     if (e.key === 'Escape') iptalEt();
@@ -38,39 +36,39 @@ const GorevKarti = ({ todo, darkMode, isMobile, durumuDegistir, goreviUcur, duze
   return (
     <Reorder.Item 
       value={todo}
-      dragListener={false} // Tum kartin suruklenmesini kapattik (Rapor P0)
+      dragListener={false} 
       dragControls={controls}
-      whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px rgba(0,242,254,0.3)" }}
+      whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}
       style={{ 
         display: 'flex', 
         alignItems: 'flex-start', 
         gap: isMobile ? '8px' : '16px', 
         padding: isMobile ? '16px 12px' : '20px 24px', 
-        opacity: todo.completed ? 0.4 : 1, 
-        background: darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.7)',
-        backdropFilter: 'blur(10px)',
-        borderTop: darkMode ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
-        borderLeft: todo.completed ? '4px solid #636e72' : (darkMode ? '4px solid #00f2fe' : '4px solid #6c5ce7'),
-        borderRadius: '16px'
+        opacity: todo.completed ? 0.6 : 1, 
+        background: darkMode ? '#18181b' : '#ffffff',
+        border: darkMode ? '1px solid #27272a' : '1px solid #e4e4e7',
+        // Madde 15: Yesil tamamlananlar, Mor (veya gri) normal sinirlar
+        borderLeft: todo.completed ? '4px solid #10b981' : (darkMode ? '4px solid #7c3aed' : '4px solid #6366f1'),
+        borderRadius: '12px'
       }}
     >
-      {/* Rapor P0/P1: 6 noktali surukleme tutamaci (Grip) */}
       <div 
         onPointerDown={(e) => controls.start(e)} 
-        style={{ cursor: 'grab', padding: '4px', opacity: 0.5 }}
+        style={{ cursor: 'grab', padding: '4px', opacity: 0.4 }}
         title="Sürükle"
         aria-label="Görevi Sürükle"
       >
         <Menu width={22} height={22} color={darkMode ? '#fff' : '#000'} />
       </div>
 
-      <button onClick={() => durumuDegistir(todo.id)} aria-label="Tamamla" title="Tamamla" style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '2px 0', color: todo.completed ? (darkMode ? '#636e72' : '#b2bec3') : (darkMode ? '#00f2fe' : '#6c5ce7') }}>
+      <button onClick={() => durumuDegistir(todo.id)} aria-label="Tamamla" title="Tamamla" style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '2px 0', color: todo.completed ? '#10b981' : (darkMode ? '#71717a' : '#a1a1aa') }}>
         {todo.completed ? <CheckCircleSolid width={26} height={26} /> : <Circle width={26} height={26} />}
       </button>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
         {isEditing ? (
           <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+            {/* Madde 16: outline: none kaldirildi, klavye odagi aktif */}
             <input
               type="text"
               value={editText}
@@ -78,38 +76,36 @@ const GorevKarti = ({ todo, darkMode, isMobile, durumuDegistir, goreviUcur, duze
               onKeyDown={handleKeyDown}
               autoFocus
               aria-label="Görevi Düzenle"
-              style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: 'none', borderBottom: `2px solid ${darkMode ? '#00f2fe' : '#6c5ce7'}`, color: darkMode ? '#fff' : '#2d3436', fontSize: '16px', padding: '4px 8px', borderRadius: '4px' }}
+              style={{ flex: 1, background: darkMode ? '#27272a' : '#f4f4f5', border: `1px solid ${darkMode ? '#7c3aed' : '#6366f1'}`, color: darkMode ? '#fff' : '#09090b', fontSize: '16px', padding: '8px 12px', borderRadius: '6px' }}
             />
           </div>
         ) : (
-          <span style={{ fontSize: '16px', fontWeight: 600, textDecoration: todo.completed ? 'line-through' : 'none', color: darkMode ? '#fff' : '#2d3436', wordBreak: 'break-word' }}>
+          <span style={{ fontSize: '16px', fontWeight: 500, textDecoration: todo.completed ? 'line-through' : 'none', color: darkMode ? '#fafafa' : '#09090b', wordBreak: 'break-word' }}>
             {todo.text}
           </span>
         )}
         
-        {/* Rapor P0/P1: Tarih gosterimi */}
         {afilliTarih(todo.dueDate)}
       </div>
 
-      {/* Duzenleme durumunda Kaydet/Iptal butonlari cikiyor */}
       <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
         {isEditing ? (
           <>
-            <button onClick={kaydet} aria-label="Kaydet" title="Kaydet" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#00b894', padding: '6px' }}>
+            <button onClick={kaydet} aria-label="Kaydet" title="Kaydet" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#10b981', padding: '6px' }}>
               <Check width={22} height={22} />
             </button>
-            <button onClick={iptalEt} aria-label="İptal" title="İptal" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ff003c', padding: '6px' }}>
+            <button onClick={iptalEt} aria-label="İptal" title="İptal" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '6px' }}>
               <Xmark width={22} height={22} />
             </button>
           </>
         ) : (
           <>
             {!todo.completed && (
-              <button onClick={() => setIsEditing(true)} aria-label="Düzenle" title="Düzenle" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: darkMode ? '#00f2fe' : '#6c5ce7', padding: '6px' }}>
+              <button onClick={() => setIsEditing(true)} aria-label="Düzenle" title="Düzenle" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: darkMode ? '#a1a1aa' : '#71717a', padding: '6px' }}>
                 <EditPencil width={22} height={22} />
               </button>
             )}
-            <button onClick={() => goreviUcur(todo.id)} aria-label="Sil" title="Sil" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ff003c', padding: '6px' }}>
+            <button onClick={() => goreviUcur(todo.id)} aria-label="Sil" title="Sil" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '6px' }}>
               <Trash width={22} height={22} />
             </button>
           </>
@@ -128,14 +124,22 @@ export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Madde 19: Anlik bildirim (Toast) state'i
+  const [bildirim, setBildirim] = useState<string | null>(null);
+
+  const bildir = (mesaj: string) => {
+    setBildirim(mesaj);
+    setTimeout(() => setBildirim(null), 3000); // 3 saniye sonra gizle
+  };
 
   useEffect(() => {
     const ekraniKontrolEt = () => setIsMobile(window.innerWidth < 768);
     ekraniKontrolEt();
     window.addEventListener('resize', ekraniKontrolEt);
 
-    const kayitliGorevler = localStorage.getItem('my_todos_cyber_clean');
-    const kayitliTema = localStorage.getItem('my_theme_cyber_clean');
+    const kayitliGorevler = localStorage.getItem('my_todos_elite');
+    const kayitliTema = localStorage.getItem('my_theme_elite');
 
     if (kayitliGorevler) {
       try { setTodos(JSON.parse(kayitliGorevler)); } catch (e) { console.log(e); }
@@ -148,19 +152,20 @@ export default function Home() {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('my_todos_cyber_clean', JSON.stringify(todos));
-      localStorage.setItem('my_theme_cyber_clean', darkMode ? 'dark' : 'light');
+      localStorage.setItem('my_todos_elite', JSON.stringify(todos));
+      localStorage.setItem('my_theme_elite', darkMode ? 'dark' : 'light');
       
       document.body.style.margin = '0';
       document.body.style.overflow = isMobile ? 'auto' : 'hidden'; 
-      document.body.style.transition = 'background 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+      document.body.style.transition = 'background 0.4s ease, color 0.4s ease';
 
+      // Elit, sade, premium renk paleti
       if (darkMode) {
-        document.body.style.background = 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)';
-        document.body.style.color = '#e0e0e0';
+        document.body.style.background = '#09090b'; // Koyu gri/siyah
+        document.body.style.color = '#fafafa';
       } else {
-        document.body.style.background = 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)';
-        document.body.style.color = '#120428';
+        document.body.style.background = '#fafafa'; // Kirik beyaz
+        document.body.style.color = '#09090b';
       }
     }
   }, [todos, darkMode, isLoaded, isMobile]);
@@ -179,21 +184,30 @@ export default function Home() {
     setTodos([yeniItem, ...todos]); 
     setYeniGorev('');
     setSecilenTarih('');
+    bildir("Görev eklendi"); // Madde 19
   };
 
   const durumuDegistir = (id: number) => {
-    setTodos(todos.map((todo) => todo.id === id ? { ...todo, completed: !todo.completed } : todo));
+    setTodos(todos.map((todo) => {
+      if (todo.id === id) {
+        const yeniDurum = !todo.completed;
+        bildir(yeniDurum ? "Görev tamamlandı" : "Görev geri alındı"); // Madde 19
+        return { ...todo, completed: yeniDurum };
+      }
+      return todo;
+    }));
   };
 
-  // Rapor P1: Silme islemi icin basit bir onay penceresi ekledik
   const goreviUcur = (id: number) => {
     if(window.confirm("Bu görevi silmek istediğine emin misin?")) {
       setTodos(todos.filter((todo) => todo.id !== id));
+      bildir("Görev silindi"); // Madde 19
     }
   };
 
   const duzenlemeyiKaydet = (id: number, yeniMetin: string) => {
     setTodos(todos.map((todo) => todo.id === id ? { ...todo, text: yeniMetin } : todo));
+    bildir("Değişiklikler kaydedildi"); // Madde 19
   };
 
   const gosterilecekler = todos.filter(todo => {
@@ -205,11 +219,8 @@ export default function Home() {
   const toplamSayi = todos.length;
   const aktifSayi = todos.filter(t => !t.completed).length;
   const bitenSayi = toplamSayi - aktifSayi;
-
-  // Rapor P2: Ilerleme cubugu (Progress Bar) icin yuzde hesaplama
   const bitisYuzdesi = toplamSayi === 0 ? 0 : Math.round((bitenSayi / toplamSayi) * 100);
 
-  // Rapor P1: Hızlı tarih seçimleri
   const bugunuSec = () => {
     const d = new Date();
     setSecilenTarih(d.toISOString().split('T')[0]);
@@ -220,7 +231,6 @@ export default function Home() {
     setSecilenTarih(d.toISOString().split('T')[0]);
   };
 
-  // Rapor P0/P1: Gelismis tarih hesaplama (15 Agustos gibi gosterim eklendi)
   const afilliTarih = (tarih?: string) => {
     if (!tarih) return null;
     
@@ -231,72 +241,62 @@ export default function Home() {
 
     let yazi = "";
     let renk = "";
-
+    // Madde 15 Renkleri: Gri ikincil, Kirmizi gecikme
     if (farkGun < 0) { 
       yazi = "Süresi geçti"; 
-      renk = "#ff003c"; 
+      renk = "#ef4444"; 
     } else if (farkGun === 0) { 
       yazi = "Bugün"; 
-      renk = darkMode ? "#f0f" : "#d100d1"; 
+      renk = darkMode ? "#7c3aed" : "#6366f1"; // Mor (Ana Eylem)
     } else if (farkGun === 1) { 
       yazi = "Yarın"; 
-      renk = darkMode ? "#00f2fe" : "#005bea"; 
+      renk = darkMode ? "#a1a1aa" : "#71717a"; // Gri
     } else { 
       yazi = `${hedef.getDate()} ${aylar[hedef.getMonth()]}`; 
-      renk = darkMode ? '#a29bfe' : '#6c5ce7'; 
+      renk = darkMode ? '#a1a1aa' : '#71717a'; // Gri
     }
 
     return (
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: renk, fontWeight: 700, background: darkMode ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.6)', padding: '2px 8px', borderRadius: '8px', border: `1px solid ${renk}55`, width: 'fit-content' }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: renk, fontWeight: 600, background: darkMode ? '#27272a' : '#f4f4f5', padding: '4px 10px', borderRadius: '6px', border: `1px solid ${darkMode ? '#3f3f46' : '#e4e4e7'}`, width: 'fit-content' }}>
         <Calendar width={14} height={14} />
         {yazi}
       </span>
     );
   };
 
-  // Rapor P1: Bos durumlari filtreye gore ayarliyoruz
   let bosMesaj = "Listeniz şu an boş.";
   if (filtre === 'aktif') bosMesaj = "Bekleyen görev yok, kralsın!";
   if (filtre === 'biten') bosMesaj = "Henüz biten görev yok. Biraz çalışalım!";
 
   if (!isLoaded) return null;
 
-  const anaCamStili = {
-    background: darkMode ? 'rgba(15, 12, 41, 0.7)' : 'rgba(255, 255, 255, 0.5)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    borderRight: isMobile ? 'none' : (darkMode ? '1px solid rgba(0, 242, 254, 0.2)' : '1px solid rgba(142, 197, 252, 0.5)'),
-    borderBottom: isMobile ? (darkMode ? '1px solid rgba(0, 242, 254, 0.2)' : '1px solid rgba(142, 197, 252, 0.5)') : 'none',
-    boxShadow: darkMode ? '0 0 30px rgba(0, 242, 254, 0.1)' : '0 10px 30px rgba(0, 0, 0, 0.05)'
-  };
-
-  const formCamStili = {
-    background: darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.7)',
-    backdropFilter: 'blur(10px)',
-    border: darkMode ? '1px solid rgba(255, 0, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.8)',
-    borderRadius: '16px'
+  // Temiz ve premium sol panel stili
+  const panelStili = {
+    background: darkMode ? '#18181b' : '#ffffff',
+    borderRight: isMobile ? 'none' : (darkMode ? '1px solid #27272a' : '1px solid #e4e4e7'),
+    borderBottom: isMobile ? (darkMode ? '1px solid #27272a' : '1px solid #e4e4e7') : 'none',
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: isMobile ? 'auto' : '100vh', minHeight: '100vh', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       
-      {/* Rapor P2: Sol menuyu 280'den 240px'e cektik */}
-      <aside style={{ width: isMobile ? '100%' : '240px', padding: isMobile ? '20px' : '30px 20px', display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '30px', ...anaCamStili, zIndex: 10 }}>
+      {/* SOL TARAFTAKI MENU */}
+      <aside style={{ width: isMobile ? '100%' : '260px', padding: isMobile ? '20px' : '40px 24px', display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '40px', ...panelStili, zIndex: 10 }}>
         
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 5px' }}>
-          <h1 style={{ fontSize: isMobile ? '22px' : '26px', fontWeight: 900, margin: 0, letterSpacing: '1px', background: darkMode ? 'linear-gradient(to right, #00f2fe, #4facfe)' : 'linear-gradient(to right, #6c5ce7, #a29bfe)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textShadow: darkMode ? '0 0 20px rgba(0,242,254,0.3)' : 'none' }}>Görevlerim</h1>
+          <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, margin: 0, letterSpacing: '-0.5px' }}>Görevlerim</h1>
           <button 
             onClick={() => setDarkMode(!darkMode)}
             aria-label="Temayı Değiştir"
             title="Temayı Değiştir"
-            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: darkMode ? '#00f2fe' : '#6c5ce7', display: 'flex' }}
+            style={{ background: darkMode ? '#27272a' : '#f4f4f5', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: darkMode ? '#fafafa' : '#09090b', display: 'flex' }}
           >
-            {darkMode ? <SunLight width={24} height={24} /> : <HalfMoon width={24} height={24} />}
+            {darkMode ? <SunLight width={20} height={20} /> : <HalfMoon width={20} height={20} />}
           </button>
         </div>
 
         <nav style={{ display: 'flex', flexDirection: isMobile ? 'row' : 'column', gap: '8px', overflowX: isMobile ? 'auto' : 'visible', paddingBottom: isMobile ? '4px' : '0' }}>
-          {!isMobile && <p style={{ fontSize: '11px', fontWeight: 800, color: darkMode ? '#a29bfe' : '#6c5ce7', textTransform: 'uppercase', letterSpacing: '3px', paddingLeft: '10px', marginBottom: '4px' }}>Görünüm</p>}
+          {!isMobile && <p style={{ fontSize: '12px', fontWeight: 600, color: darkMode ? '#71717a' : '#a1a1aa', textTransform: 'uppercase', letterSpacing: '1px', paddingLeft: '12px', marginBottom: '4px' }}>Görünüm</p>}
           
           {(['hepsi', 'aktif', 'biten'] as const).map((durum) => (
             <button
@@ -304,21 +304,17 @@ export default function Home() {
               aria-label={`${durum} Filtresi`}
               onClick={() => setFiltre(durum)}
               style={{
-                background: filtre === durum ? (darkMode ? 'rgba(0, 242, 254, 0.15)' : 'rgba(108, 92, 231, 0.15)') : 'transparent',
+                background: filtre === durum ? (darkMode ? '#27272a' : '#f4f4f5') : 'transparent',
                 border: 'none',
-                padding: isMobile ? '10px 14px' : '12px 16px',
-                borderRadius: '12px',
+                padding: '10px 14px',
+                borderRadius: '8px',
                 cursor: 'pointer',
                 textAlign: 'left',
-                color: filtre === durum ? (darkMode ? '#00f2fe' : '#6c5ce7') : (darkMode ? '#b2bec3' : '#2d3436'),
-                fontWeight: filtre === durum ? 700 : 500,
-                transition: 'all 0.3s ease',
+                color: filtre === durum ? (darkMode ? '#fafafa' : '#09090b') : (darkMode ? '#a1a1aa' : '#71717a'),
+                fontWeight: filtre === durum ? 600 : 500,
+                transition: 'all 0.2s ease',
                 textTransform: 'capitalize',
-                display: 'flex',
-                alignItems: 'center',
-                whiteSpace: 'nowrap',
-                gap: '8px',
-                boxShadow: filtre === durum && darkMode ? (isMobile ? 'inset 0 2px 0 #00f2fe' : 'inset 2px 0 0 #00f2fe') : 'none' 
+                whiteSpace: 'nowrap'
               }}
             >
               {durum === 'hepsi' ? 'Tüm Görevler' : durum === 'aktif' ? 'Bekleyenler' : 'Tamamlananlar'}
@@ -327,79 +323,88 @@ export default function Home() {
         </nav>
 
         {!isMobile && (
-          <div style={{ marginTop: 'auto', padding: '20px', ...formCamStili }}>
-            <h3 style={{ fontSize: '12px', margin: '0 0 16px 0', color: darkMode ? '#f0f' : '#d100d1', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 800 }}>Özet Paneli</h3>
+          <div style={{ marginTop: 'auto', padding: '20px', background: darkMode ? '#27272a' : '#f4f4f5', borderRadius: '12px' }}>
+            <h3 style={{ fontSize: '13px', margin: '0 0 16px 0', color: darkMode ? '#fafafa' : '#09090b', fontWeight: 600 }}>Özet Paneli</h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span style={{ fontSize: '13px', color: darkMode ? '#b2bec3' : '#636e72', fontWeight: 600 }}>Toplam</span>
-              <span style={{ fontWeight: 800 }}>{toplamSayi}</span>
+              <span style={{ fontSize: '13px', color: darkMode ? '#a1a1aa' : '#71717a', fontWeight: 500 }}>Toplam</span>
+              <span style={{ fontWeight: 600 }}>{toplamSayi}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span style={{ fontSize: '13px', color: darkMode ? '#b2bec3' : '#636e72', fontWeight: 600 }}>Aktif</span>
-              <span style={{ fontWeight: 800, color: darkMode ? '#00f2fe' : '#0984e3' }}>{aktifSayi}</span>
+              <span style={{ fontSize: '13px', color: darkMode ? '#a1a1aa' : '#71717a', fontWeight: 500 }}>Aktif</span>
+              <span style={{ fontWeight: 600, color: darkMode ? '#7c3aed' : '#6366f1' }}>{aktifSayi}</span>
             </div>
             
-            {/* Rapor P2: Ilerleme (Progress) cubugu eklendi */}
-            <div style={{ width: '100%', height: '6px', background: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', borderRadius: '10px', marginTop: '16px' }}>
-              <div style={{ width: `${bitisYuzdesi}%`, height: '100%', background: darkMode ? '#00f2fe' : '#6c5ce7', borderRadius: '10px', transition: 'width 0.3s ease' }}></div>
+            <div style={{ width: '100%', height: '6px', background: darkMode ? '#3f3f46' : '#e4e4e7', borderRadius: '10px', marginTop: '16px' }}>
+              <div style={{ width: `${bitisYuzdesi}%`, height: '100%', background: darkMode ? '#10b981' : '#10b981', borderRadius: '10px', transition: 'width 0.3s ease' }}></div>
             </div>
-            <p style={{fontSize: '11px', textAlign: 'right', marginTop: '6px', opacity: 0.7, margin: 0}}>% {bitisYuzdesi} Biten</p>
+            <p style={{fontSize: '11px', textAlign: 'right', marginTop: '8px', color: darkMode ? '#a1a1aa' : '#71717a', margin: 0, fontWeight: 500}}>% {bitisYuzdesi} Biten</p>
           </div>
         )}
       </aside>
 
-      <main style={{ flex: 1, overflowY: isMobile ? 'visible' : 'auto', padding: isMobile ? '24px 16px' : '40px 60px' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <main style={{ flex: 1, overflowY: isMobile ? 'visible' : 'auto', padding: isMobile ? '24px 16px' : '60px 80px' }}>
+        <div style={{ maxWidth: '700px', margin: '0 auto' }}>
           
           <header style={{ marginBottom: isMobile ? '30px' : '40px' }}>
-            <h2 style={{ fontSize: isMobile ? '32px' : '42px', fontWeight: 900, margin: '0 0 8px 0', letterSpacing: '-1px' }}>
+            <h2 style={{ fontSize: isMobile ? '28px' : '36px', fontWeight: 800, margin: '0 0 8px 0', letterSpacing: '-1px' }}>
               {filtre === 'hepsi' ? 'Tüm Görevler' : filtre === 'aktif' ? 'Yapılacaklar' : 'Bitenler'}
             </h2>
           </header>
 
-          {/* Rapor P1: Form, Bitenler ekraninda gizlendi */}
           {filtre !== 'biten' && (
             <form onSubmit={gorevEkle} style={{ 
               display: 'flex', 
-              flexDirection: isMobile ? 'column' : 'row',
-              gap: '12px', 
-              marginBottom: isMobile ? '30px' : '40px', 
-              padding: '12px', // Rapor P2: Form agirligi (padding) azaltildi
-              ...formCamStili,
-              boxShadow: darkMode ? '0 0 15px rgba(255, 0, 255, 0.1)' : '0 2px 10px rgba(0,0,0,0.05)'
+              flexDirection: 'column', // Alt alta duzen daha temiz durur
+              gap: '16px', 
+              marginBottom: isMobile ? '30px' : '50px', 
+              padding: '20px', 
+              background: darkMode ? '#18181b' : '#ffffff',
+              border: darkMode ? '1px solid #27272a' : '1px solid #e4e4e7',
+              borderRadius: '16px',
             }}>
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', padding: isMobile ? '4px' : '0 8px' }}>
-                <Plus width={22} height={22} color={darkMode ? '#f0f' : '#6c5ce7'} />
-                <input
-                  type="text"
-                  placeholder="Yeni bir hedef belirleyin..."
-                  value={yeniGorev}
-                  onChange={(e) => setYeniGorev(e.target.value)}
-                  aria-label="Görev Ekleme Alanı"
-                  required
-                  style={{ width: '100%', padding: '8px 12px', background: 'transparent', border: 'none', color: darkMode ? '#fff' : '#2d3436', fontSize: '16px', fontWeight: 600 }}
-                />
+              
+              {/* Madde 8: Görünür Etiketler (Labels) eklendi */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label htmlFor="gorev-adi" style={{ fontSize: '13px', fontWeight: 600, color: darkMode ? '#a1a1aa' : '#71717a' }}>Görev Açıklaması</label>
+                <div style={{ display: 'flex', alignItems: 'center', background: darkMode ? '#27272a' : '#f4f4f5', borderRadius: '8px', padding: '0 12px' }}>
+                  <Plus width={20} height={20} color={darkMode ? '#71717a' : '#a1a1aa'} />
+                  <input
+                    id="gorev-adi"
+                    type="text"
+                    placeholder="Yeni bir hedef belirleyin..."
+                    value={yeniGorev}
+                    onChange={(e) => setYeniGorev(e.target.value)}
+                    required
+                    style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', color: darkMode ? '#fff' : '#09090b', fontSize: '15px', fontWeight: 500 }}
+                  />
+                </div>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderLeft: isMobile ? 'none' : (darkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)'), borderTop: isMobile ? (darkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)') : 'none', paddingTop: isMobile ? '12px' : '0', paddingLeft: isMobile ? '4px' : '12px' }}>
-                {/* Rapor P2: Hizli tarih butonlari */}
-                {!isMobile && (
-                  <div style={{display: 'flex', gap: '4px', marginRight: '8px'}}>
-                    <button type="button" onClick={bugunuSec} style={{fontSize: '11px', padding: '4px 8px', borderRadius: '6px', background: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', border: 'none', color: darkMode ? '#fff' : '#000', cursor: 'pointer'}}>Bugün</button>
-                    <button type="button" onClick={yariniSec} style={{fontSize: '11px', padding: '4px 8px', borderRadius: '6px', background: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', border: 'none', color: darkMode ? '#fff' : '#000', cursor: 'pointer'}}>Yarın</button>
+              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '16px', alignItems: isMobile ? 'stretch' : 'flex-end' }}>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                  <label htmlFor="son-tarih" style={{ fontSize: '13px', fontWeight: 600, color: darkMode ? '#a1a1aa' : '#71717a' }}>Son Tarih</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {!isMobile && (
+                      <div style={{display: 'flex', gap: '6px'}}>
+                        <button type="button" onClick={bugunuSec} style={{fontSize: '12px', padding: '8px 12px', borderRadius: '6px', background: darkMode ? '#27272a' : '#f4f4f5', border: 'none', color: darkMode ? '#fafafa' : '#09090b', cursor: 'pointer', fontWeight: 500}}>Bugün</button>
+                        <button type="button" onClick={yariniSec} style={{fontSize: '12px', padding: '8px 12px', borderRadius: '6px', background: darkMode ? '#27272a' : '#f4f4f5', border: 'none', color: darkMode ? '#fafafa' : '#09090b', cursor: 'pointer', fontWeight: 500}}>Yarın</button>
+                      </div>
+                    )}
+                    <input
+                      id="son-tarih"
+                      type="date"
+                      value={secilenTarih}
+                      onChange={(e) => setSecilenTarih(e.target.value)}
+                      style={{ flex: 1, background: darkMode ? '#27272a' : '#f4f4f5', border: 'none', color: darkMode ? '#fafafa' : '#09090b', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500, fontSize: '14px', padding: '8px 12px', borderRadius: '6px' }}
+                    />
                   </div>
-                )}
-                <input
-                  type="date"
-                  value={secilenTarih}
-                  onChange={(e) => setSecilenTarih(e.target.value)}
-                  aria-label="Son Tarih Seçimi"
-                  style={{ background: 'transparent', border: 'none', color: darkMode ? '#00f2fe' : '#6c5ce7', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '14px', width: isMobile ? '100%' : 'auto' }}
-                />
+                </div>
+
+                <button type="submit" aria-label="Görevi Ekle" style={{ background: darkMode ? '#7c3aed' : '#6366f1', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '15px', height: 'fit-content' }}>
+                  Ekle
+                </button>
               </div>
-              
-              <button type="submit" aria-label="Görevi Ekle" style={{ background: darkMode ? 'transparent' : '#6c5ce7', color: darkMode ? '#f0f' : '#fff', border: darkMode ? '2px solid #f0f' : 'none', padding: isMobile ? '12px' : '0 24px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s', width: isMobile ? '100%' : 'auto' }}>
-                Ekle
-              </button>
             </form>
           )}
 
@@ -419,15 +424,28 @@ export default function Home() {
           </Reorder.Group>
 
           {gosterilecekler.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '60px 0', opacity: 0.5 }}>
-              <CheckCircleSolid width={56} height={56} color={darkMode ? '#00f2fe' : '#6c5ce7'} style={{ marginBottom: '16px', opacity: 0.5 }} />
-              {/* Rapor P1: Bos mesajlari filtreye gore degistirdik */}
-              <h3 style={{ fontSize: '18px', margin: '0 0 8px 0', fontWeight: 600, color: darkMode ? '#fff' : '#2d3436', letterSpacing: '1px' }}>{bosMesaj}</h3>
+            <div style={{ textAlign: 'center', padding: '60px 0', opacity: 0.4 }}>
+              <CheckCircleSolid width={48} height={48} color={darkMode ? '#71717a' : '#a1a1aa'} style={{ marginBottom: '16px' }} />
+              <h3 style={{ fontSize: '16px', margin: '0 0 8px 0', fontWeight: 500, color: darkMode ? '#fafafa' : '#09090b' }}>{bosMesaj}</h3>
             </div>
           )}
           
         </div>
       </main>
+
+      {/* Madde 19: Anlik Bildirim (Toast) Gosterimi */}
+      <AnimatePresence>
+        {bildirim && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', background: darkMode ? '#fafafa' : '#18181b', color: darkMode ? '#09090b' : '#fafafa', padding: '12px 24px', borderRadius: '30px', fontSize: '14px', fontWeight: 600, boxShadow: '0 10px 30px rgba(0,0,0,0.2)', zIndex: 999 }}
+          >
+            {bildirim}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
